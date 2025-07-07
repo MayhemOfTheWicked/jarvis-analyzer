@@ -29,7 +29,8 @@ def analiz_yap(ticker):
 
     # Al/Sat sinyali
     last = df.iloc[-1]
-    if last['MACD'] > last['Signal'] and last['RSI'] < 30:
+    if not last.empty:
+        if last['MACD'].iloc[-1] > last['Signal'].iloc[-1] and last['RSI'].iloc[-1] < 30:
         signal = 'BUY'
     elif last['MACD'] < last['Signal'] and last['RSI'] > 70:
         signal = 'SELL'
