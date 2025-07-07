@@ -28,14 +28,13 @@ def analiz_yap(ticker):
     df['RSI'] = 100 - (100 / (1 + rs))
 
     # Al/Sat sinyali
-    last = df.iloc[-1]
+    signal = 'HOLD'  # varsayılan
     if not df.empty:
+        last = df.iloc[-1]
         if last['MACD'] > last['Signal'] and last['RSI'] < 30:
             signal = 'BUY'
         elif last['MACD'] < last['Signal'] and last['RSI'] > 70:
             signal = 'SELL'
-        else:
-            signal = 'HOLD'
 
     # Grafik
     fig, ax = plt.subplots(figsize=(10, 4))
@@ -72,6 +71,4 @@ def analyze():
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    if __name__ == '__main__':
-        app.run(debug=True, port=5001)
+    app.run(debug=True, port=5001)
