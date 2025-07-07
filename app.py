@@ -29,13 +29,13 @@ def analiz_yap(ticker):
 
     # Al/Sat sinyali
     last = df.iloc[-1]
-    if not last.empty:
-        if last['MACD'].iloc[-1] > last['Signal'].iloc[-1] and last['RSI'].iloc[-1] < 30:
-        signal = 'BUY'
-    elif last['MACD'] < last['Signal'] and last['RSI'] > 70:
-        signal = 'SELL'
-    else:
-        signal = 'HOLD'
+    if not df.empty:
+        if last['MACD'] > last['Signal'] and last['RSI'] < 30:
+            signal = 'BUY'
+        elif last['MACD'] < last['Signal'] and last['RSI'] > 70:
+            signal = 'SELL'
+        else:
+            signal = 'HOLD'
 
     # Grafik
     fig, ax = plt.subplots(figsize=(10, 4))
