@@ -1,14 +1,15 @@
-import base64
-import io
-
-import matplotlib.pyplot as plt
-import yfinance
 from flask import Flask, request, jsonify
+import yfinance as yf
+import pandas as pd
+print(pd.__version__)
+import matplotlib.pyplot as plt
+import io
+import base64
 
 app = Flask(__name__)
 
 def analiz_yap(ticker):
-    df = yfinance.download(ticker, period='3mo', interval='1d', auto_adjust=False)
+    df = yf.download(ticker, period='3mo', interval='1d', auto_adjust=False)
     if df.empty:
         return {"error": "Veri bulunamadı."}
 
@@ -20,19 +21,20 @@ def analiz_yap(ticker):
 
     # RSI hesaplama
     delta = df['Adj Close'].diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
     avg_gain = gain.rolling(window=14).mean()
     avg_loss = loss.rolling(window=14).mean()
     rs = avg_gain / avg_loss
     df['RSI'] = 100 - (100 / (1 + rs))
 
-    # Al/Sat sinyali
+    # En son veriyi al
     last = df.iloc[-1]
-    macd = float(last['MACD'])
-    signal_line = float(last['Signal'])
-    rsi = float(last['RSI'])
+    macd = last['MACD']
+    signal_line = last['Signal']
+    rsi = last['RSI']
 
+    # Al/Sat sinyali
     if macd > signal_line and rsi < 30:
         signal = 'BUY'
     elif macd < signal_line and rsi > 70:
@@ -40,7 +42,7 @@ def analiz_yap(ticker):
     else:
         signal = 'HOLD'
 
-    # Grafik oluşturma
+    # Grafik oluştur
     fig, ax = plt.subplots(figsize=(10, 4))
     df['Adj Close'].plot(ax=ax, label='Fiyat')
     df['MACD'].plot(ax=ax, label='MACD')
@@ -49,6 +51,7 @@ def analiz_yap(ticker):
     ax.legend()
     plt.tight_layout()
 
+    # Görseli base64'e çevir
     buf = io.BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
